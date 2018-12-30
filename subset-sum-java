@@ -1,0 +1,82 @@
+package com.ddesk.util;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+@Component
+public class KoiliarisAlgo {
+	public static void main(String[] args) {
+
+		/*try {
+			System.out.println(obj.writeValueAsString(
+					approx_with_accounting_and_duplicates(Arrays.asList(25.25f,25.25f,25.25f,25.25f,25.25f,25.25f,25.25f,25.25f,25.25f,25.25f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,32.25f,32.25f,32.25f,32.25f,32.25f,32.25f,32.25f,32.25f,32.25f,32.25f
+							,25.25f,25.25f,25.25f,25.25f,25.25f,25.25f,25.25f,25.25f,25.25f,25.25f,
+							25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,
+							25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,25.75f,
+							32.25f,32.25f,32.25f,32.25f,32.25f,32.25f,32.25f,32.25f,32.25f,32.25f), 118.5f)));
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+
+	}
+
+	public  Entry<Float, Float[]> approx_with_accounting_and_duplicates(List<Float> x_list, Float s) throws JsonProcessingException {
+
+		final float c = 0.01f; // fraction error (constant)
+		final int N = x_list.size();
+
+		TreeMap<Float, Float[]> S = new TreeMap<>();
+		S.put(0f, new Float[]{});
+
+		Collections.sort(x_list);
+
+		for (final Float x : x_list) {
+			final Map<Float, Float[]> T = new HashMap<>();
+			final Map<Float, Float[]> U = new TreeMap<>();
+			for (final Float y : S.keySet()) {
+				final Float[] y_list = S.get(y);
+				T.put(x + y,arrayIntPush(x, y_list));
+			}
+
+			U.putAll(T);
+			U.putAll(S);
+
+			Float y = U.keySet().stream().findFirst().get();
+			final Float[] y_list = U.get(y);
+			S = new TreeMap<>();
+			S.put(y, y_list);
+			for (final Float z : U.keySet()) {
+				final Float[] z_list = U.get(z);
+
+				final float lower_bound = (y.floatValue() + c * s.floatValue()) / N;
+
+				// if lower_bound is less than z and z is less than or equals s
+				if (lower_bound < z && z <= s) {
+					y = z;
+					S.put(z, z_list);
+					// z_list = new ArrayList<>();
+				}
+			}
+		}
+
+		return S.pollLastEntry();
+	}
+	
+	public  Float[] arrayIntPush(Float item, Float[] oldArray) {
+	    int len = oldArray.length;
+	    Float[] newArray = new Float[len+1];
+	    System.arraycopy(oldArray, 0, newArray, 0, len);
+	    newArray[len] = item;
+
+	    return newArray;
+	}
+}
